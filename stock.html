@@ -1,0 +1,205 @@
+<!-- stock.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stock - Vicky's Cafe</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background: #fdf6ec;
+      margin: 0;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    header {
+      background: #f4a261;
+      color: white;
+      text-align: center;
+      padding: 25px 15px;
+      border-bottom: 4px solid #e76f51;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
+
+    header p {
+      margin: 5px 0 15px;
+      font-size: 0.95rem;
+      color: #ffe8d6;
+    }
+
+    nav a {
+      margin: 0 8px;
+      text-decoration: none;
+      padding: 10px 16px;
+      background: #e76f51;
+      color: #fff;
+      border-radius: 8px;
+      font-weight: bold;
+      display: inline-block;
+    }
+
+    nav a:hover {
+      background: #2a9d8f;
+      transform: scale(1.05);
+    }
+
+    .section {
+      max-width: 700px;
+      margin: 30px auto;
+      background: #fffdf3;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    input {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+
+    button {
+      padding: 10px 16px;
+      margin-left: 5px;
+      background: #2a9d8f;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #21867a;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #eee;
+    }
+
+    #searchBox {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .stock-buttons button {
+      margin-left: 5px;
+      padding: 6px 12px;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>☕ Vicky's Cafe</h1>
+  <p>Below Duhai RapidX Station, Pillar No. C-3 - Open Daily 9AM to 9PM</p>
+  <nav>
+    <a href="index.html">Billing Panel</a>
+    <a href="bills.html">Saved Bills</a>
+    <a href="stock.html">Stock</a>
+  </nav>
+</header>
+
+<div class="section">
+  <h3>Add to Stock</h3>
+  <input type="text" id="stockName" placeholder="Item name" />
+  <input type="number" id="stockQty" placeholder="Qty" min="1" />
+  <input type="number" id="stockPrice" placeholder="Price" min="0" step="0.01" />
+  <button onclick="addToStock()">Add</button>
+</div>
+
+<div class="section">
+  <h3>Current Stock</h3>
+  <input type="text" id="searchBox" placeholder="Search..." oninput="loadStockList()" />
+  <ul id="stockList"></ul>
+</div>
+
+<script>
+  function loadStockList() {
+    const stock = JSON.parse(localStorage.getItem("vickys_stock")) || {};
+    const query = document.getElementById("searchBox").value.toLowerCase();
+    const list = document.getElementById("stockList");
+    list.innerHTML = "";
+
+    for (let item in stock) {
+      if (!item.toLowerCase().includes(query)) continue;
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <span>${item} - Qty: ${stock[item].qty}, ₹${stock[item].price.toFixed(2)}</span>
+        <span class="stock-buttons">
+          <button onclick="editStock('${item}')">Edit</button>
+          <button onclick="deleteStock('${item}')">Delete</button>
+        </span>`;
+      list.appendChild(li);
+    }
+  }
+
+  function addToStock() {
+    const name = document.getElementById("stockName").value.trim();
+    const qty = parseInt(document.getElementById("stockQty").value);
+    const price = parseFloat(document.getElementById("stockPrice").value);
+
+    if (!name || isNaN(qty) || qty < 1 || isNaN(price) || price < 0) {
+      alert("Enter valid values.");
+      return;
+    }
+
+    let stock = JSON.parse(localStorage.getItem("vickys_stock")) || {};
+    if (stock[name]) {
+      stock[name].qty += qty;
+      stock[name].price = price;
+    } else {
+      stock[name] = { qty, price };
+    }
+
+    localStorage.setItem("vickys_stock", JSON.stringify(stock));
+    loadStockList();
+    document.getElementById("stockName").value = '';
+    document.getElementById("stockQty").value = '';
+    document.getElementById("stockPrice").value = '';
+  }
+
+  function editStock(name) {
+    const stock = JSON.parse(localStorage.getItem("vickys_stock"));
+    const current = stock[name];
+    const qty = prompt("New quantity:", current.qty);
+    const price = prompt("New price:", current.price);
+
+    if (qty !== null && price !== null && !isNaN(qty) && !isNaN(price)) {
+      stock[name].qty = parseInt(qty);
+      stock[name].price = parseFloat(price);
+      localStorage.setItem("vickys_stock", JSON.stringify(stock));
+      loadStockList();
+    }
+  }
+
+  function deleteStock(name) {
+    if (!confirm(`Delete ${name}?`)) return;
+    const stock = JSON.parse(localStorage.getItem("vickys_stock"));
+    delete stock[name];
+    localStorage.setItem("vickys_stock", JSON.stringify(stock));
+    loadStockList();
+  }
+
+  window.onload = loadStockList;
+</script>
+
+</body>
+</html>

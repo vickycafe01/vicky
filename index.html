@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vicky's Cafe Billing Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      margin: 0;
+      background: #fdf6ec;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    header {
+      background: #f4a261;
+      color: white;
+      text-align: center;
+      padding: 25px 15px;
+      border-bottom: 4px solid #e76f51;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      animation: slideDown 0.8s ease-out;
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
+
+    header p {
+      margin: 5px 0 15px;
+      font-size: 0.95rem;
+      color: #ffe8d6;
+    }
+
+    nav a {
+      margin: 0 8px;
+      text-decoration: none;
+      padding: 10px 16px;
+      background: #e76f51;
+      color: #fff;
+      border-radius: 8px;
+      font-weight: bold;
+      display: inline-block;
+      transition: transform 0.2s, background 0.3s;
+    }
+
+    nav a:hover {
+      background: #2a9d8f;
+      transform: scale(1.05);
+    }
+
+    .section {
+      background: #fffdf3;
+      max-width: 650px;
+      margin: 30px auto;
+      padding: 25px 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      animation: fadeUp 0.6s ease-in-out;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h3 {
+      margin-top: 0;
+      color: #264653;
+      border-bottom: 2px solid #f4a261;
+      padding-bottom: 6px;
+      margin-bottom: 20px;
+    }
+
+    input, select {
+      padding: 10px;
+      margin: 5px 0 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    input[type="text"], select {
+      width: 100%;
+    }
+
+    input[type="number"] {
+      width: 120px;
+    }
+
+    .full-width {
+      width: 100%;
+    }
+
+    button {
+      padding: 10px 16px;
+      background: #2a9d8f;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    button:hover {
+      background: #21867a;
+      transform: scale(1.05);
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #eee;
+    }
+
+    li button {
+      background: #e76f51;
+      font-size: 0.85rem;
+      padding: 6px 12px;
+    }
+
+    .total {
+      text-align: right;
+      font-weight: bold;
+      font-size: 1.2rem;
+      margin-top: 20px;
+      color: #264653;
+    }
+
+    label {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    #itemDropdownList {
+      position: absolute;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      max-height: 150px;
+      overflow-y: auto;
+      display: none;
+      z-index: 10;
+      width: 100%;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      animation: dropdownSlide 0.2s ease-in-out;
+    }
+
+    @keyframes dropdownSlide {
+      from { opacity: 0; transform: scaleY(0.9); }
+      to { opacity: 1; transform: scaleY(1); }
+    }
+
+    .dropdown-item {
+      padding: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-size: 0.95rem;
+    }
+
+    .dropdown-item small {
+      color: gray;
+      float: right;
+    }
+
+    .dropdown-item:hover,
+    .dropdown-item.active {
+      background: #f4a261;
+      color: white;
+    }
+
+    @media screen and (max-width: 600px) {
+      input[type="number"] {
+        width: 100%;
+      }
+
+      nav {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 10px;
+      }
+
+      nav a {
+        width: 100%;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>☕ Vicky's Cafe</h1>
+  <p>Below Duhai RapidX Station, Pillar No. C-3 - Open Daily 9AM to 9PM</p>
+  <nav>
+    <a href="index.html">Billing Panel</a>
+    <a href="bills.html">Saved Bills</a>
+    <a href="stock.html">Stock</a>
+  </nav>
+</header>
+
+<div class="section">
+  <h3>Bill Info</h3>
+  <input type="text" id="billName" class="full-width" placeholder="Customer Name and Number" />
+</div>
+
+<div class="section">
+  <h3>Add Items to Bill</h3>
+  <input type="text" id="itemSearch" placeholder="Search & select item" autocomplete="off" />
+  <div id="itemDropdownList"></div>
+  <input type="number" id="itemQty" placeholder="Qty" min="1" value="1" />
+  <button onclick="addItem()">➕ Add Item</button>
+</div>
+
+<div class="section">
+  <ul id="itemList"></ul>
+  <div class="total">Total: ₹<span id="total">0.00</span></div>
+  <div style="margin-top: 10px;">
+    <label for="discountType">Discount:</label>
+    <select id="discountType">
+      <option value="none">None</option>
+      <option value="percent">Percentage (%)</option>
+      <option value="flat">Flat (₹)</option>
+    </select>
+    <input type="number" id="discountValue" placeholder="0" min="0" style="width: 100px;" oninput="updateList()" />
+  </div>
+  <div class="total">Grand Total: ₹<span id="grandTotal">0.00</span></div>
+  <button onclick="saveBill()">💾 Save Bill</button>
+</div>
+
+<script>
+  const itemSearch = document.getElementById("itemSearch");
+  const dropdown = document.getElementById("itemDropdownList");
+  const itemList = document.getElementById("itemList");
+  const totalSpan = document.getElementById("total");
+  const itemQty = document.getElementById("itemQty");
+  const billNameInput = document.getElementById("billName");
+
+  let items = [], stockItems = {}, filteredList = [], activeIndex = -1;
+
+  function loadStockItems() {
+    stockItems = JSON.parse(localStorage.getItem("vickys_stock")) || {};
+  }
+
+  function showDropdown(filter = "") {
+    dropdown.innerHTML = "";
+    filteredList = Object.keys(stockItems).filter(key =>
+      stockItems[key].qty > 0 && key.toLowerCase().includes(filter.toLowerCase())
+    );
+
+    if (filteredList.length === 0) {
+      dropdown.style.display = "none";
+      return;
+    }
+
+    filteredList.forEach((item, index) => {
+      const div = document.createElement("div");
+      div.className = "dropdown-item";
+      div.innerHTML = `${item} <small>Qty: ${stockItems[item].qty}, ₹${stockItems[item].price}</small>`;
+      if (index === activeIndex) div.classList.add("active");
+      div.onclick = () => {
+        itemSearch.value = item;
+        dropdown.style.display = "none";
+      };
+      dropdown.appendChild(div);
+    });
+
+    dropdown.style.display = "block";
+  }
+
+  itemSearch.addEventListener("input", () => {
+    activeIndex = -1;
+    showDropdown(itemSearch.value);
+  });
+
+  itemSearch.addEventListener("keydown", (e) => {
+    if (!filteredList.length) return;
+    const items = dropdown.querySelectorAll(".dropdown-item");
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      activeIndex = (activeIndex + 1) % filteredList.length;
+      showDropdown(itemSearch.value);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      activeIndex = (activeIndex - 1 + filteredList.length) % filteredList.length;
+      showDropdown(itemSearch.value);
+    } else if (e.key === "Enter" && activeIndex >= 0) {
+      e.preventDefault();
+      itemSearch.value = filteredList[activeIndex];
+      dropdown.style.display = "none";
+    }
+  });
+
+  function addItem() {
+    const name = itemSearch.value.trim();
+    const qty = parseInt(itemQty.value);
+
+    if (!name || isNaN(qty) || qty < 1) {
+      alert("Enter valid item name and quantity.");
+      return;
+    }
+
+    if (!stockItems[name] || stockItems[name].qty < qty) {
+      alert("Insufficient stock or invalid item.");
+      return;
+    }
+
+    const price = stockItems[name].price;
+    items.push({ name, price, qty });
+    updateList();
+
+    itemSearch.value = '';
+    itemQty.value = 1;
+    dropdown.style.display = "none";
+  }
+
+  function removeItem(index) {
+    items.splice(index, 1);
+    updateList();
+  }
+
+  function calculateDiscountedTotal(total) {
+    const type = document.getElementById("discountType").value;
+    const value = parseFloat(document.getElementById("discountValue").value);
+    if (isNaN(value) || value <= 0) return total;
+    if (type === "percent") return total - (total * value / 100);
+    if (type === "flat") return Math.max(0, total - value);
+    return total;
+  }
+
+  function updateList() {
+    itemList.innerHTML = "";
+    let total = 0;
+    items.forEach((item, index) => {
+      const subtotal = item.price * item.qty;
+      total += subtotal;
+      const li = document.createElement("li");
+      li.innerHTML = `${item.name} × ${item.qty} = ₹${subtotal.toFixed(2)}
+        <button onclick="removeItem(${index})">Remove</button>`;
+      itemList.appendChild(li);
+    });
+    totalSpan.textContent = total.toFixed(2);
+    const discounted = calculateDiscountedTotal(total);
+    document.getElementById("grandTotal").textContent = discounted.toFixed(2);
+  }
+
+  function saveBill() {
+    const billName = billNameInput.value.trim();
+    if (!billName) {
+      alert("Please enter Customer Name and Number before saving.");
+      return;
+    }
+
+    if (items.length === 0) {
+      alert("Add some items before saving.");
+      return;
+    }
+
+    const stock = { ...stockItems };
+    for (const item of items) {
+      if (!stock[item.name] || stock[item.name].qty < item.qty) {
+        alert(`Not enough stock for item: ${item.name}`);
+        return;
+      }
+    }
+
+    for (const item of items) {
+      stock[item.name].qty -= item.qty;
+    }
+    localStorage.setItem("vickys_stock", JSON.stringify(stock));
+
+    const discountType = document.getElementById("discountType").value;
+    const discountValue = parseFloat(document.getElementById("discountValue").value) || 0;
+    const total = items.reduce((sum, item) => sum + item.price * item.qty, 0);
+    const finalTotal = calculateDiscountedTotal(total);
+
+    const bill = {
+      id: new Date().toISOString(),
+      name: billName,
+      items: [...items],
+      total: total,
+      discount: {
+        type: discountType,
+        value: discountValue
+      },
+      grandTotal: finalTotal
+    };
+
+    let savedBills = JSON.parse(localStorage.getItem("vickys_bills")) || [];
+    savedBills.push(bill);
+    localStorage.setItem("vickys_bills", JSON.stringify(savedBills));
+
+    items = [];
+    updateList();
+    itemSearch.value = '';
+    billNameInput.value = '';
+    document.getElementById("discountValue").value = '';
+    document.getElementById("discountType").value = 'none';
+    alert("Bill saved!");
+    loadStockItems();
+  }
+
+  window.onload = loadStockItems;
+</script>
+
+</body>
+</html>

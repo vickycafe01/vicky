@@ -1,0 +1,240 @@
+<!-- bills.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Saved Bills - Vicky's Cafe</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background: #fdf6ec;
+      margin: 0;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    header {
+      background: #f4a261;
+      color: white;
+      text-align: center;
+      padding: 25px 15px;
+      border-bottom: 4px solid #e76f51;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+    }
+
+    header p {
+      margin: 5px 0 15px;
+      font-size: 0.95rem;
+      color: #ffe8d6;
+    }
+
+    nav a {
+      margin: 0 8px;
+      text-decoration: none;
+      padding: 10px 16px;
+      background: #e76f51;
+      color: #fff;
+      border-radius: 8px;
+      font-weight: bold;
+      display: inline-block;
+      transition: transform 0.2s, background 0.3s;
+    }
+
+    nav a:hover {
+      background: #2a9d8f;
+      transform: scale(1.05);
+    }
+
+    .section {
+      background: #fffdf3;
+      max-width: 700px;
+      margin: 30px auto;
+      padding: 25px 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .search-bar {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .search-bar input, .search-bar select {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      width: 45%;
+    }
+
+    .bill-entry {
+      padding: 15px;
+      margin-bottom: 10px;
+      background: #ffe8d6;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.3s, transform 0.2s;
+      cursor: pointer;
+    }
+
+    .bill-entry:hover {
+      background: #f4a261;
+      transform: scale(1.02);
+    }
+
+    .bill-entry button {
+      background: #e63946;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 20px;
+      max-width: 500px;
+      border-radius: 12px;
+    }
+
+    .modal-content button {
+      background: #2a9d8f;
+      margin-right: 10px;
+    }
+
+    .modal-content pre {
+      white-space: pre-wrap;
+      font-size: 0.95rem;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>☕ Vicky's Cafe</h1>
+  <p>Below Duhai RapidX Station, Pillar No. C-3 - Open Daily 9AM to 9PM</p>
+  <nav>
+    <a href="index.html">Billing Panel</a>
+    <a href="bills.html">Saved Bills</a>
+    <a href="stock.html">Stock</a>
+  </nav>
+</header>
+
+<div class="section">
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Search by name or date..." oninput="loadBillHistory()" />
+    <select id="dateFilter" onchange="loadBillHistory()">
+      <option value="all">All Time</option>
+      <option value="today">Today</option>
+      <option value="last7">Last 7 Days</option>
+      <option value="month">This Month</option>
+      <option value="year">This Year</option>
+    </select>
+  </div>
+  <div id="billHistory"></div>
+</div>
+
+<div id="billModal" class="modal">
+  <div class="modal-content">
+    <h3>Bill Details</h3>
+    <pre id="billDetails"></pre>
+    <button onclick="printBill()">🖨️ Print</button>
+    <button onclick="closeModal()">Close</button>
+  </div>
+</div>
+
+<script>
+  let currentBill = null;
+
+  function loadBillHistory() {
+    const searchInput = document.getElementById("searchInput").value.toLowerCase();
+    const dateFilter = document.getElementById("dateFilter").value;
+    const now = new Date();
+    const billHistory = document.getElementById("billHistory");
+    const savedBills = JSON.parse(localStorage.getItem("vickys_bills")) || [];
+
+    const filtered = savedBills.filter(bill => {
+      const billDate = new Date(bill.id);
+      const matchText = bill.name?.toLowerCase().includes(searchInput) ||
+                        bill.items.some(i => i.name.toLowerCase().includes(searchInput)) ||
+                        billDate.toLocaleString().toLowerCase().includes(searchInput);
+      if (!matchText) return false;
+
+      switch (dateFilter) {
+        case "today": return billDate.toDateString() === now.toDateString();
+        case "last7": return billDate >= new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        case "month": return billDate.getMonth() === now.getMonth() && billDate.getFullYear() === now.getFullYear();
+        case "year": return billDate.getFullYear() === now.getFullYear();
+        default: return true;
+      }
+    });
+
+    billHistory.innerHTML = filtered.length ? '' : '<p>No bills found.</p>';
+    filtered.reverse().forEach(bill => {
+      const div = document.createElement("div");
+      div.className = "bill-entry";
+      div.innerHTML = `<div><strong>${bill.name || "Unnamed"}</strong> – ${new Date(bill.id).toLocaleString()}</div>
+                       <button onclick="event.stopPropagation(); deleteBill('${bill.id}')">Delete</button>`;
+      div.onclick = () => showBillDetails(bill);
+      billHistory.appendChild(div);
+    });
+  }
+
+  function showBillDetails(bill) {
+    currentBill = bill;
+    let text = `🧾 Date: ${new Date(bill.id).toLocaleString()}\nCustomer: ${bill.name || 'N/A'}\n\n`;
+    bill.items.forEach(item => {
+      const subtotal = item.price * item.qty;
+      text += `- ${item.name} × ${item.qty} = ₹${subtotal.toFixed(2)}\n`;
+    });
+    text += `\nTotal: ₹${bill.total.toFixed(2)}`;
+    if (bill.discount && bill.discount.type !== "none" && bill.discount.value > 0) {
+      const label = bill.discount.type === "percent" ? `${bill.discount.value}%` : `₹${bill.discount.value}`;
+      text += `\nDiscount: ${label}\nGrand Total: ₹${bill.grandTotal.toFixed(2)}`;
+    }
+    document.getElementById("billDetails").textContent = text;
+    document.getElementById("billModal").style.display = "flex";
+  }
+
+  function closeModal() {
+    document.getElementById("billModal").style.display = "none";
+  }
+
+  function deleteBill(id) {
+    if (!confirm("Delete this bill?")) return;
+    let bills = JSON.parse(localStorage.getItem("vickys_bills")) || [];
+    bills = bills.filter(b => b.id !== id);
+    localStorage.setItem("vickys_bills", JSON.stringify(bills));
+    loadBillHistory();
+  }
+
+  function printBill() {
+    window.print(); // Replace this with jsPDF if PDF output is preferred
+  }
+
+  window.onload = loadBillHistory;
+</script>
+
+</body>
+</html>
